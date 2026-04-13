@@ -53,7 +53,7 @@ function TopBar({ user, onLogout }) {
     <AppBar className="topbar-appBar" position="absolute">
       <Toolbar>
         <Typography variant="h5" color="inherit" sx={{ flexGrow: 1 }}>
-          Zach Leach
+          Samuel Ma & Zach Leach
         </Typography>
         <Typography variant="h5" color="inherit" sx={{ mr: 2 }}>
           {context}
