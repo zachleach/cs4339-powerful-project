@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
   location: String,
   description: String,
   occupation: String,
+  // TODO: P3 auth fields
+  login_name: String,
+  password_digest: String,
 });
 
 /**

@@ -23,5 +23,6 @@ module.exports = {
     'no-multiple-empty-lines': ['error', { max: 1 }],
     'react/jsx-one-expression-per-line': 'off',
     'arrow-parens': ['error', 'as-needed'],
+    'react/jsx-no-bind': 'off',
   },
 };

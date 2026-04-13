@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ReactDOM from 'react-dom/client';
 import { Grid, Typography, Paper } from '@mui/material';
 import {
   createBrowserRouter, RouterProvider, Outlet, useParams,
 } from 'react-router-dom';
+// TODO: import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './styles/main.css';
 import TopBar from './components/TopBar';
 import UserDetail from './components/UserDetail';
 import UserList from './components/UserList';
 import UserPhotos from './components/UserPhotos';
+// eslint-disable-next-line no-unused-vars
+import LoginRegister from './components/LoginRegister';
+
+// TODO: create QueryClient
+// const queryClient = new QueryClient();
 
 function Home() {
   return (
@@ -32,6 +38,10 @@ function UserPhotosRoute() {
   return <UserPhotos userId={userId} />;
 }
 
+/**
+ * Root layout - shows app when logged in
+ * TODO: receive user prop and pass to TopBar for logout button
+ */
 function Root() {
   return (
     <div>
@@ -80,5 +90,30 @@ const router = createBrowserRouter([
   },
 ]);
 
+/**
+ * App component - handles auth state
+ * TODO: implement auth gating
+ * - If not logged in (user is null), show LoginRegister
+ * - If logged in, show RouterProvider with the app
+ * - Pass user to Root so TopBar can show logout button
+ */
+function App() {
+  // eslint-disable-next-line no-unused-vars
+  let [user, setUser] = useState(null);
+
+  // TODO: implement auth gating
+  // if (!user) {
+  //   return <LoginRegister onLogin={setUser} />;
+  // }
+
+  return <RouterProvider router={router} />;
+}
+
 const root = ReactDOM.createRoot(document.getElementById('photoshareapp'));
-root.render(<RouterProvider router={router} />);
+// TODO: wrap in QueryClientProvider
+// root.render(
+//   <QueryClientProvider client={queryClient}>
+//     <App />
+//   </QueryClientProvider>
+// );
+root.render(<App />);
