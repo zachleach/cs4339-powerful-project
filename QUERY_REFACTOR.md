@@ -1,22 +1,26 @@
 > AI Generated Tutorial with Claude Opus 4.5 per AI policy: All AI usage is allowed except using AI to write code
 
-# Data Sync Task (TanStack Query + Mutations)
+# useQuery Refactor (TanStack Query)
 
 ## Overview
 
-Replace manual `useEffect`/`useState` data fetching with TanStack Query. Add the ability for logged-in users to post comments on photos. TanStack Query handles caching, refetching, and keeping the UI in sync with server state.
+Replace manual `useEffect`/`useState` data fetching with TanStack Query's `useQuery` hook. Also implement the comment form with `useMutation`. This is a code quality refactor; the app behaves the same from the user's perspective. The main benefits are less boilerplate, automatic loading/error state management, and cache deduplication (two components needing the same data share one request).
 
-## Core Concepts to Learn
+Note: this task does not add real-time sync across clients. `invalidateQueries` after a comment post just re-fetches data for the current user's browser.
 
-**useQuery**: Declarative data fetching. Instead of `useEffect` + `useState`, you call `useQuery({ queryKey: ['users'], queryFn: () => api.get('/user/list') })`. It returns `{ data, isLoading, error }`. The `queryKey` is used for caching and invalidation.
+## Core Concepts
 
-**useMutation**: For write operations (POST, PUT, DELETE). Returns `{ mutate, isPending }`. After a mutation succeeds, you typically invalidate related queries so they refetch.
+**useQuery**: Declarative data fetching. Instead of `useEffect` + `useState`, you call `useQuery({ queryKey: ['users'], queryFn: () => api.get('/user/list').then(res => res.data) })`. It returns `{ data, isLoading, error }`. TanStack Query calls `queryFn`, stores the result under `queryKey`, and handles loading state automatically.
 
-**QueryClient**: Central cache manager. Wrap your app in `<QueryClientProvider client={queryClient}>`. Use `queryClient.invalidateQueries({ queryKey: ['photos', userId] })` to trigger refetch after mutations.
+**useMutation**: For write operations (POST, PUT, DELETE). Returns `{ mutate, isPending }`. After a mutation succeeds, call `invalidateQueries` to mark related cached data as stale so it refetches.
 
-**Query keys**: Arrays that identify cached data. `['user', userId]` and `['user', '123']` are different cache entries. When you invalidate `['photos']`, all queries starting with `['photos']` refetch.
+**QueryClient**: The central cache. Holds all query results keyed by `queryKey`. Wrap your app in `<QueryClientProvider client={queryClient}>` so every component can access it via `useQuery` and `useQueryClient`.
 
-**Stale time / cache time**: Control when data is considered stale and refetched. Defaults work fine for this project.
+**Query keys**: Arrays that identify a cache entry. `['user', '123']` and `['user', '456']` are separate entries. When you call `invalidateQueries({ queryKey: ['photos'] })`, every entry whose key starts with `'photos'` is marked stale and refetches. The first element is a namespace by convention, not a named collection; the whole array is serialized into one flat key.
+
+**Cache deduplication**: If two components call `useQuery` with the same key, only one network request fires. Both components share the cached result. In this project, TopBar and UserDetail both fetch `['user', userId]` and get deduplicated automatically.
+
+**Stale time / cache time**: Control when data is considered stale and re-fetched. Defaults work fine for this project.
 
 ## Files to Modify
 
@@ -90,10 +94,11 @@ After:
 ```jsx
 import { useQuery } from '@tanstack/react-query';
 
-let { data: users, isLoading } = useQuery({
+let query = useQuery({
   queryKey: ['users'],
   queryFn: () => api.get('/user/list').then(res => res.data),
 });
+// query.data is the resolved value; query.isLoading is true while fetching
 ```
 
 ### useMutation (for posting comments)
@@ -103,7 +108,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 let queryClient = useQueryClient();
 
-let commentMutation = useMutation({
+let mutation = useMutation({
   mutationFn: (comment) => api.post('/commentsOfPhoto/' + photoId, { comment }),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ['photos', userId] });
@@ -112,7 +117,7 @@ let commentMutation = useMutation({
 });
 
 // In form submit:
-commentMutation.mutate(comment);
+mutation.mutate(comment);
 ```
 
 ### QueryClientProvider setup
