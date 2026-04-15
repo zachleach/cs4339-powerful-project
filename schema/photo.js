@@ -2,6 +2,9 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import mongoose from "mongoose";
 
+// @FegelSamuel: comments are embedded directly inside Photo documents (not a separate collection).
+// To add a comment, find the photo, push to photo.comments, then call photo.save().
+// See addComment in controllers/photo.js for the implementation stub.
 /**
  * Define the Mongoose Schema for a Comment.
  */
@@ -10,7 +13,7 @@ const commentSchema = new mongoose.Schema({
   comment: String,
   // The date and time when the comment was created.
   date_time: { type: Date, default: Date.now },
-  // The ID of the user who created the comment.
+  // The ID of the user who created the comment. Resolved to full user object at query time.
   user_id: mongoose.Schema.Types.ObjectId,
 });
 

@@ -90,6 +90,10 @@ const router = createBrowserRouter([
   },
 ]);
 
+// @FegelSamuel: App owns the top-level auth state. Once you implement login:
+// 1. Uncomment the auth gate so LoginRegister renders when user is null.
+// 2. Pass user down to Root so it can reach TopBar for the logout button.
+// 3. Uncomment QueryClientProvider wrapping below so TanStack Query works app-wide.
 /**
  * App component - handles auth state
  * TODO: implement auth gating

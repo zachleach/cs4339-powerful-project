@@ -7,6 +7,11 @@ import {
 import api from '../../lib/api';
 import './styles.css';
 
+// @FegelSamuel: this is the gated entry point shown when no user is logged in.
+// handleLogin and handleRegister are yours to implement (see TODO comments below).
+// On successful login, call onLogin(res.data) which sets user state in App (photoShare.jsx)
+// and switches the view from this form to the main app.
+// All seeded test users share the password "password"; login_name is lowercase last name (e.g. "took").
 /**
  * LoginRegister component
  * Props:

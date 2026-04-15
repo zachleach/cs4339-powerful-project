@@ -6,6 +6,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import api from '../../lib/api';
 import './styles.css';
 
+// @FegelSamuel: fetches GET /user/list on mount, renders each user as a link to their profile.
+// The empty dependency array means this only runs once; no re-fetch on navigation.
 function UserList() {
   let [users, setUsers] = useState([]);
   let [loading, setLoading] = useState(true);

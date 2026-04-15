@@ -1,3 +1,8 @@
+// @FegelSamuel: all three functions here are yours to implement.
+// login: look up user by login_name, bcrypt.compare against password_digest, set req.session.userId
+// logout: destroy session
+// register: hash password with bcrypt, create user, return user without password_digest
+// The User schema (schema/user.js) now has login_name and password_digest fields.
 // eslint-disable-next-line no-unused-vars
 import User from '../schema/user.js';
 // TODO: import bcrypt

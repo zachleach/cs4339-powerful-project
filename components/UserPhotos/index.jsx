@@ -12,6 +12,10 @@ function formatDate(dt) {
   return new Date(dt).toLocaleString();
 }
 
+// @FegelSamuel: CommentForm is the stub you need to implement.
+// It should POST to /commentsOfPhoto/:photoId with { comment } in the body.
+// On success, call onCommentAdded() which re-fetches the photos list to show the new comment.
+// When we migrate to TanStack Query, onCommentAdded() becomes a query invalidation instead.
 /**
  * CommentForm component
  * Props:
@@ -60,6 +64,9 @@ function CommentForm({ photoId, onCommentAdded }) {
   );
 }
 
+// @FegelSamuel: each photo card shows the image, timestamp, and its comments.
+// Comments come pre-joined from the server with full user objects (c.user.first_name etc).
+// See controllers/photo.js getPhotosOfUser for how that join is done.
 function UserPhotos() {
   let [photos, setPhotos] = useState([]);
   let [loading, setLoading] = useState(true);

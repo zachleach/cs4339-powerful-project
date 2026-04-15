@@ -1,3 +1,6 @@
+// @FegelSamuel: thin server file; route logic lives in controllers/, not here.
+// We split handlers into controllers/user.js, controllers/photo.js, controllers/auth.js
+// so this file stays easy to read.
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -32,6 +35,10 @@ mongoose.connect(mongoUrl);
 mongoose.connection.on('error', err => { throw err; });
 mongoose.connection.once('open', () => {});
 
+// @FegelSamuel: requireAuth is the middleware that protects all data routes.
+// Once sessions are wired up, uncomment the check below; it reads req.session.userId
+// which is set by authController.login on successful login.
+// Right now it passes everything through so the app works without auth.
 /**
  * Auth middleware - checks if user is logged in
  * TODO: implement - check req.session.userId, return 401 if not set
@@ -44,6 +51,8 @@ function requireAuth(req, res, next) {
   next(); // temporarily allow all requests
 }
 
+// @FegelSamuel: auth routes are intentionally public (no requireAuth).
+// All read/write data routes go through requireAuth first.
 // Auth routes (no auth required)
 app.post('/admin/login', authController.login);
 app.post('/admin/logout', authController.logout);

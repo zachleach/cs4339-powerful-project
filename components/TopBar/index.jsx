@@ -7,6 +7,9 @@ import { useLocation, useMatch } from 'react-router-dom';
 import api from '../../lib/api';
 import './styles.css';
 
+// @FegelSamuel: TopBar is wired to show "Hi {name}" and a Logout button when the user prop is set.
+// The user prop comes from App in photoShare.jsx once login succeeds.
+// handleLogout needs to call POST /admin/logout, then call onLogout() to clear user state in App.
 /**
  * TopBar component
  * TODO: receive props for auth:
@@ -25,6 +28,9 @@ function TopBar({ user, onLogout }) {
   const photosMatch = useMatch('/users/:userId/photos');
   const detailMatch = useMatch('/users/:userId');
 
+  // @FegelSamuel: this effect reads the route params to figure out which user page we are on,
+  // then fetches that user's name to display in the right side of the AppBar.
+  // The cancelled flag prevents a stale fetch from overwriting state after navigation.
   // TODO: convert to useQuery
   useEffect(() => {
     let cancelled = false;

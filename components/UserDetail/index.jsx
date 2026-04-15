@@ -6,6 +6,9 @@ import { useParams, Link as RouterLink } from 'react-router-dom';
 import api from '../../lib/api';
 import './styles.css';
 
+// @FegelSamuel: re-fetches whenever userId changes (clicking a different user in the sidebar).
+// The cancelled flag is a cleanup guard; without it a slow response could overwrite
+// state for the next user if the user navigated away before the first request resolved.
 function UserDetail() {
   let [user, setUser] = useState(null);
   let [loading, setLoading] = useState(true);
