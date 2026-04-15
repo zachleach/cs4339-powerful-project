@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Typography, Box, Card, CardMedia, CardContent, CircularProgress, Divider, Link,
   TextField, Button,
 } from '@mui/material';
 import { useParams, Link as RouterLink } from 'react-router-dom';
-// TODO: import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
@@ -12,39 +12,25 @@ function formatDate(dt) {
   return new Date(dt).toLocaleString();
 }
 
-// @FegelSamuel: CommentForm is the stub you need to implement.
-// It should POST to /commentsOfPhoto/:photoId with { comment } in the body.
-// On success, call onCommentAdded() which re-fetches the photos list to show the new comment.
-// When we migrate to TanStack Query, onCommentAdded() becomes a query invalidation instead.
-/**
- * CommentForm component
- * Props:
- *   photoId - the photo to add comment to
- *   onCommentAdded - callback after successful comment (to refresh)
- *
- * TODO: implement with useMutation
- * - Text field for comment
- * - Submit button
- * - POST /commentsOfPhoto/:photoId with { comment }
- * - On success, call onCommentAdded() or invalidate query
- */
-// eslint-disable-next-line no-unused-vars
-function CommentForm({ photoId, onCommentAdded }) {
+// @FegelSamuel: CommentForm posts to /commentsOfPhoto/:photoId with { comment } in the body.
+// On success it invalidates the ['photos', userId] query so UserPhotos re-fetches automatically.
+// addComment in controllers/photo.js is the backend handler that needs to be implemented.
+function CommentForm({ photoId }) {
   let [comment, setComment] = useState('');
-  let [submitting, setSubmitting] = useState(false);
+  let queryClient = useQueryClient();
+
+  let mutation = useMutation({
+    mutationFn: text => api.post('/commentsOfPhoto/' + photoId, { comment: text }),
+    onSuccess: () => {
+      setComment('');
+      queryClient.invalidateQueries({ queryKey: ['photos'] });
+    },
+  });
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!comment.trim()) return;
-    setSubmitting(true);
-    // TODO: implement with useMutation
-    // api.post('/commentsOfPhoto/' + photoId, { comment })
-    //   .then(() => {
-    //     setComment('');
-    //     onCommentAdded();
-    //   })
-    //   .finally(() => setSubmitting(false));
-    setSubmitting(false);
+    mutation.mutate(comment);
   }
 
   return (
@@ -55,9 +41,9 @@ function CommentForm({ photoId, onCommentAdded }) {
         label="Add a comment"
         value={comment}
         onChange={e => setComment(e.target.value)}
-        disabled={submitting}
+        disabled={mutation.isPending}
       />
-      <Button type="submit" variant="contained" size="small" sx={{ mt: 1 }} disabled={submitting}>
+      <Button type="submit" variant="contained" size="small" sx={{ mt: 1 }} disabled={mutation.isPending}>
         Post Comment
       </Button>
     </Box>
@@ -68,32 +54,19 @@ function CommentForm({ photoId, onCommentAdded }) {
 // Comments come pre-joined from the server with full user objects (c.user.first_name etc).
 // See controllers/photo.js getPhotosOfUser for how that join is done.
 function UserPhotos() {
-  let [photos, setPhotos] = useState([]);
-  let [loading, setLoading] = useState(true);
   const { userId } = useParams();
 
-  // TODO: convert to useQuery
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    api.get('/photosOfUser/' + userId)
-      .then(res => { if (!cancelled) setPhotos(res.data); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [userId]);
+  let query = useQuery({
+    queryKey: ['photos', userId],
+    queryFn: () => api.get('/photosOfUser/' + userId).then(res => res.data),
+  });
 
-  function handleCommentAdded() {
-    // TODO: with TanStack Query, just invalidate the query instead
-    api.get('/photosOfUser/' + userId)
-      .then(res => setPhotos(res.data));
-  }
-
-  if (loading) return <CircularProgress />;
-  if (!photos.length) return <Typography>No photos found.</Typography>;
+  if (query.isLoading) return <CircularProgress />;
+  if (!query.data?.length) return <Typography>No photos found.</Typography>;
 
   return (
     <Box>
-      {photos.map(photo => (
+      {query.data.map(photo => (
         <Card key={photo._id} sx={{ mb: 3 }}>
           <CardMedia
             component="img"
@@ -117,8 +90,7 @@ function UserPhotos() {
                 <Typography variant="body2">{c.comment}</Typography>
               </Box>
             ))}
-            {/* TODO: comment form */}
-            <CommentForm photoId={photo._id} onCommentAdded={handleCommentAdded} />
+            <CommentForm photoId={photo._id} />
           </CardContent>
         </Card>
       ))}

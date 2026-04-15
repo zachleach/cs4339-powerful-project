@@ -1,58 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   AppBar, Toolbar, Typography, Button,
 } from '@mui/material';
 import { useLocation, useMatch } from 'react-router-dom';
-// TODO: import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
 // @FegelSamuel: TopBar is wired to show "Hi {name}" and a Logout button when the user prop is set.
 // The user prop comes from App in photoShare.jsx once login succeeds.
 // handleLogout needs to call POST /admin/logout, then call onLogout() to clear user state in App.
-/**
- * TopBar component
- * TODO: receive props for auth:
- *   user - logged in user object (or null)
- *   onLogout - callback when user logs out
- *
- * TODO: show logout button when logged in
- * - Display "Hi {first_name}" and a Logout button
- * - On click, call POST /admin/logout
- * - On success, call onLogout()
- */
 // eslint-disable-next-line no-unused-vars
 function TopBar({ user, onLogout }) {
-  let [context, setContext] = useState('');
   const location = useLocation();
   const photosMatch = useMatch('/users/:userId/photos');
   const detailMatch = useMatch('/users/:userId');
+  let userId = photosMatch?.params.userId || detailMatch?.params.userId;
 
-  // @FegelSamuel: this effect reads the route params to figure out which user page we are on,
-  // then fetches that user's name to display in the right side of the AppBar.
-  // The cancelled flag prevents a stale fetch from overwriting state after navigation.
-  // TODO: convert to useQuery
-  useEffect(() => {
-    let cancelled = false;
-    let userId = photosMatch?.params.userId || detailMatch?.params.userId;
-    if (!userId) {
-      setContext('');
-      return () => {};
-    }
-    api.get('/user/' + userId).then(res => {
-      if (!cancelled) {
-        let name = `${res.data.first_name} ${res.data.last_name}`;
-        setContext(photosMatch ? 'Photos of ' + name : name);
-      }
-    });
-    return () => { cancelled = true; };
-  }, [location.pathname]);
+  // @FegelSamuel: useQuery re-runs whenever userId changes; enabled:false when no userId so it
+  // doesn't fire on the home page. context is derived from query.data, no extra state needed.
+  let query = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => api.get('/user/' + userId).then(res => res.data),
+    enabled: !!userId,
+  });
 
+  let context = '';
+  if (query.data) {
+    let name = `${query.data.first_name} ${query.data.last_name}`;
+    context = photosMatch ? 'Photos of ' + name : name;
+  }
+
+  // eslint-disable-next-line no-unused-vars
   function handleLogout() {
-    // TODO: implement with useMutation
-    // api.post('/admin/logout')
-    //   .then(() => onLogout())
-    //   .catch(err => console.error('Logout failed', err));
+    // TODO: implement with useMutation once auth is in place
   }
 
   return (
@@ -64,7 +45,6 @@ function TopBar({ user, onLogout }) {
         <Typography variant="h5" color="inherit" sx={{ mr: 2 }}>
           {context}
         </Typography>
-        {/* TODO: show when logged in */}
         {user && (
           <>
             <Typography color="inherit" sx={{ mr: 2 }}>

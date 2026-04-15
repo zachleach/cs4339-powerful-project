@@ -1,29 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   List, ListItem, ListItemText, Divider, CircularProgress, Typography,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
 // @FegelSamuel: fetches GET /user/list on mount, renders each user as a link to their profile.
 // The empty dependency array means this only runs once; no re-fetch on navigation.
 function UserList() {
-  let [users, setUsers] = useState([]);
-  let [loading, setLoading] = useState(true);
+  let query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => api.get('/user/list').then(res => res.data),
+  });
 
-  useEffect(() => {
-    api.get('/user/list')
-      .then(res => setUsers(res.data))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <CircularProgress />;
-  if (!users.length) return <Typography>No users found.</Typography>;
+  if (query.isLoading) return <CircularProgress />;
+  if (!query.data?.length) return <Typography>No users found.</Typography>;
 
   return (
     <List component="nav">
-      {users.map(u => (
+      {query.data.map(u => (
         <React.Fragment key={u._id}>
           <ListItem
             button
