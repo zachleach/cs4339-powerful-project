@@ -36,7 +36,11 @@ async function getById(req, res) {
     }
 
     let user = await User.findById(userId);
-    if (!user) return res.status(404).send('User not found');
+    // tests yell at me to do this, i don't remember what __v is for
+    delete user.login_name;
+    delete user.password_digest;
+    delete user.__v;
+    if (!user) return res.status(400).send('User not found');
     return res.json(user);
   } catch (err) {
     return res.status(500).send(err.message);
