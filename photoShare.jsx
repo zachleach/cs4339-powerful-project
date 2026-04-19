@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ReactDOM from 'react-dom/client';
 import { Grid, Typography, Paper } from '@mui/material';
 import {
   createBrowserRouter, RouterProvider, Outlet, useParams,
 } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient, QueryClientProvider, useQuery, useQueryClient,
+} from '@tanstack/react-query';
 
 import './styles/main.css';
 import TopBar from './components/TopBar';
 import UserDetail from './components/UserDetail';
 import UserList from './components/UserList';
 import UserPhotos from './components/UserPhotos';
-// eslint-disable-next-line no-unused-vars
 import LoginRegister from './components/LoginRegister';
 import api from './lib/api';
 
@@ -28,8 +29,6 @@ function Home() {
 
 function UserDetailRoute() {
   const { userId } = useParams();
-  // eslint-disable-next-line no-console
-  console.log('UserDetailRoute: userId is:', userId);
   return <UserDetail userId={userId} />;
 }
 
@@ -82,35 +81,37 @@ function UserLayout() {
  */
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  let qc = useQueryClient();
 
-  useEffect(() => {
-    api.get('/admin/me')
-      .then((response) => {
-        setUser(response.data);
-      })
-      .catch(() => {
-        // Not logged in or error, just clear user and continue
-        setUser(null);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  let meQuery = useQuery({
+    queryKey: ['me'],
+    queryFn: () => api.get('/admin/me').then(r => r.data),
+    retry: false,
+    staleTime: Infinity,
+  });
 
-  if (isLoading) {
+  let user = meQuery.data || null;
+
+  function handleLogin(userData) {
+    qc.setQueryData(['me'], userData);
+  }
+
+  function handleLogout() {
+    qc.setQueryData(['me'], null);
+  }
+
+  if (meQuery.isLoading) {
     return <Typography>Loading...</Typography>;
   }
 
   if (!user) {
-    return <LoginRegister onLogin={setUser} />;
+    return <LoginRegister onLogin={handleLogin} />;
   }
 
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Root user={user} onLogout={() => setUser(null)} />,
+      element: <Root user={user} onLogout={handleLogout} />,
       children: [
         { index: true, element: <Home /> },
 
@@ -135,5 +136,5 @@ const root = ReactDOM.createRoot(document.getElementById('photoshareapp'));
 root.render(
   <QueryClientProvider client={queryClient}>
     <App />
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );
