@@ -5,7 +5,7 @@ import { Grid, Typography, Paper } from '@mui/material';
 import {
   createBrowserRouter, RouterProvider, Outlet, useParams,
 } from 'react-router-dom';
-// TODO: import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './styles/main.css';
 import TopBar from './components/TopBar';
@@ -15,8 +15,7 @@ import UserPhotos from './components/UserPhotos';
 // eslint-disable-next-line no-unused-vars
 import LoginRegister from './components/LoginRegister';
 
-// TODO: create QueryClient
-// const queryClient = new QueryClient();
+const queryClient = new QueryClient();
 
 function Home() {
   return (
@@ -114,10 +113,8 @@ function App() {
 }
 
 const root = ReactDOM.createRoot(document.getElementById('photoshareapp'));
-// TODO: wrap in QueryClientProvider
-// root.render(
-//   <QueryClientProvider client={queryClient}>
-//     <App />
-//   </QueryClientProvider>
-// );
-root.render(<App />);
+root.render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
+);
