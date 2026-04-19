@@ -1,10 +1,6 @@
-// @FegelSamuel: LINT FIXES NEEDED
-// 1. Add /* eslint-disable camelcase */ at the very top of this file
-// 2. Swap import order: bcrypt must come before User (import/order rule)
-// 3. In logout(), add "return" before req.session.destroy() for consistent-return
-// 4. Fix export at bottom: break { login, logout, register, me } onto multiple lines
-import User from '../schema/user.js';
+/* eslint-disable camelcase */
 import bcrypt from 'bcrypt';
+import User from '../schema/user.js';
 
 /**
  * POST /admin/login
@@ -51,7 +47,7 @@ async function logout(req, res) {
     return res.status(400).send('Not logged in');
   }
 
-  req.session.destroy(err => {
+  return req.session.destroy(err => {
     if (err) {
       return res.status(500).send('Could not log out');
     }
@@ -129,4 +125,9 @@ async function me(req, res) {
   }
 }
 
-export { login, logout, register, me };
+export {
+  login,
+  logout,
+  register,
+  me,
+};

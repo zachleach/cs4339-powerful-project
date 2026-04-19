@@ -2,9 +2,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import mongoose from "mongoose";
 
-// @FegelSamuel: comments are embedded directly inside Photo documents (not a separate collection).
-// To add a comment, find the photo, push to photo.comments, then call photo.save().
-// See addComment in controllers/photo.js for the implementation stub.
 /**
  * Define the Mongoose Schema for a Comment.
  */

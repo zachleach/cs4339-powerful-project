@@ -7,16 +7,11 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
-// @FegelSamuel: TopBar is wired to show "Hi {name}" and a Logout button when the user prop is set.
-// The user prop comes from App in photoShare.jsx once login succeeds.
-// handleLogout needs to call POST /admin/logout, then call onLogout() to clear user state in App.
 function TopBar({ user, onLogout }) {
   const photosMatch = useMatch('/users/:userId/photos');
   const detailMatch = useMatch('/users/:userId');
   let userId = photosMatch?.params.userId || detailMatch?.params.userId;
 
-  // @FegelSamuel: useQuery re-runs whenever userId changes; enabled:false when no userId so it
-  // doesn't fire on the home page. context is derived from query.data, no extra state needed.
   let query = useQuery({
     queryKey: ['user', userId],
     queryFn: () => api.get('/user/' + userId).then(res => res.data),

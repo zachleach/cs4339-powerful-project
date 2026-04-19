@@ -12,9 +12,6 @@ function formatDate(dt) {
   return new Date(dt).toLocaleString();
 }
 
-// @FegelSamuel: CommentForm posts to /commentsOfPhoto/:photoId with { comment } in the body.
-// On success it invalidates the ['photos', userId] query so UserPhotos re-fetches automatically.
-// addComment in controllers/photo.js is the backend handler that needs to be implemented.
 function CommentForm({ photoId }) {
   let [comment, setComment] = useState('');
   let queryClient = useQueryClient();
@@ -42,17 +39,16 @@ function CommentForm({ photoId }) {
         value={comment}
         onChange={e => setComment(e.target.value)}
         disabled={mutation.isPending}
+        error={mutation.isError}
+        helperText={mutation.isError ? (mutation.error?.response?.data || 'Failed to post comment') : ''}
       />
       <Button type="submit" variant="contained" size="small" sx={{ mt: 1 }} disabled={mutation.isPending}>
-        Post Comment
+        {mutation.isPending ? 'Posting...' : 'Post Comment'}
       </Button>
     </Box>
   );
 }
 
-// @FegelSamuel: each photo card shows the image, timestamp, and its comments.
-// Comments come pre-joined from the server with full user objects (c.user.first_name etc).
-// See controllers/photo.js getPhotosOfUser for how that join is done.
 function UserPhotos() {
   const { userId } = useParams();
 

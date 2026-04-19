@@ -7,8 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
-// @FegelSamuel: fetches GET /user/list on mount, renders each user as a link to their profile.
-// The empty dependency array means this only runs once; no re-fetch on navigation.
 function UserList() {
   let query = useQuery({
     queryKey: ['users'],

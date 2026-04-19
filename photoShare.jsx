@@ -37,10 +37,6 @@ function UserPhotosRoute() {
   return <UserPhotos userId={userId} />;
 }
 
-/**
- * Root layout - shows app when logged in
- * TODO: receive user prop and pass to TopBar for logout button
- */
 function Root({ user, onLogout }) {
   return (
     <div>
@@ -67,18 +63,6 @@ function Root({ user, onLogout }) {
 function UserLayout() {
   return <Outlet />;
 }
-
-// @FegelSamuel: App owns the top-level auth state. Once you implement login:
-// 1. Uncomment the auth gate so LoginRegister renders when user is null.
-// 2. Pass user down to Root so it can reach TopBar for the logout button.
-// 3. Uncomment QueryClientProvider wrapping below so TanStack Query works app-wide.
-/**
- * App component - handles auth state
- * TODO: implement auth gating
- * - If not logged in (user is null), show LoginRegister
- * - If logged in, show RouterProvider with the app
- * - Pass user to Root so TopBar can show logout button
- */
 
 function App() {
   const qc = useQueryClient();
