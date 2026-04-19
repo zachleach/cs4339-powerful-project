@@ -1,10 +1,3 @@
-// @FegelSamuel: LINT FIXES NEEDED
-// 1. Line 22: remove extra blank line
-// 2. Line 25, 31, 44: add trailing commas
-// 3. Line 28: change var to let
-// 4. Line 34: remove trailing space
-// 5. Line 44: remove extra spaces before comment
-// 6. Line 60: add "return next();" instead of just "next();" for consistent-return
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -20,21 +13,18 @@ const port = process.env.PORT || 3001;
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1/project3';
 
 // Enable CORS for frontend running on a different port
-// TODO: configure cors to allow credentials for session cookies
-
-
 const allowedOrigins = [
   process.env.REACT_URL || 'http://localhost:3000',
-  process.env.SERVER_URL || `http://localhost:${port}` // allows itself
+  process.env.SERVER_URL || `http://localhost:${port}`,
 ];
 
-var corsOptions = {
+const corsOptions = {
   credentials: true,
   origin: allowedOrigins,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions)); 
+app.use(cors(corsOptions));
 
 // Parse JSON bodies
 app.use(express.json());
@@ -44,7 +34,7 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }  // set true in production with HTTPS and whatnot
+  cookie: { secure: false }, // set true in production with HTTPS
 }));
 
 // Connect to MongoDB
@@ -64,7 +54,7 @@ function requireAuth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).send('Not logged in');
   }
-  next();
+  return next();
 }
 
 // All read/write data routes go through requireAuth first.
