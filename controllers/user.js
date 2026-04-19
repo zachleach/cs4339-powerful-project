@@ -25,27 +25,19 @@ async function getList(req, res) {
  * GET /user/:id
  * Returns user details: { _id, first_name, last_name, location, description, occupation }
  */
-// @FegelSamuel: delete on Mongoose docs doesn't work - need .toObject() first
-// Also move the null check BEFORE the deletes or it crashes when user not found
-// Fix: let userObj = user.toObject(); delete userObj.login_name; etc.
-// Or simpler: use .select('first_name last_name location description occupation') on findById
 async function getById(req, res) {
   try {
-    let userId = req.params.id;
+    const userId = req.params.id;
 
     if (!isValidObjectId(userId)) {
       return res.status(400).send('Invalid user id');
     }
 
-    let user = await User.findById(userId);
+    const user = await User.findById(userId).select('-login_name -password_digest -__v');
     if (!user) return res.status(400).send('User not found');
-    // tests yell at me to do this, i don't remember what __v is for
-    delete user.login_name;
-    delete user.password_digest;
-    delete user.__v;
     return res.json(user);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(400).send(err.message);
   }
 }
 
