@@ -72,8 +72,37 @@ async function getPhotosOfUser(req, res) {
 // 5. Call photo.save(), return 200
 // Note: requireAuth middleware already handles 401, so you don't need to check session here
 async function addComment(req, res) {
-  // TODO: implement
-  return res.status(501).send('Not implemented');
+  const { photoId } = req.params;
+  const { comment } = req.body;
+  const { userId } = req.session;
+
+  if (!comment || comment.trim() === '') {
+    return res.status(400).send('Comment text cannot be empty');
+  }
+
+  if (!isValidObjectId(photoId)) {
+    return res.status(404).send('Invalid photo ID');
+  }
+
+  try {
+    const photo = await Photo.findById(photoId);
+    if (!photo) {
+      return res.status(404).send('Photo not found');
+    }
+
+    const newComment = {
+      comment,
+      user_id: userId,
+      date_time: new Date(),
+    };
+
+    photo.comments.push(newComment);
+    await photo.save();
+
+    return res.status(200).send('Comment added successfully');
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
 }
 
 export { getPhotosOfUser, addComment };

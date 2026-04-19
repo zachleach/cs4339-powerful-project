@@ -42,9 +42,11 @@ function CommentForm({ photoId }) {
         value={comment}
         onChange={e => setComment(e.target.value)}
         disabled={mutation.isPending}
+        error={mutation.isError}
+        helperText={mutation.isError ? (mutation.error?.response?.data || "Failed to post comment") : ""}
       />
       <Button type="submit" variant="contained" size="small" sx={{ mt: 1 }} disabled={mutation.isPending}>
-        Post Comment
+        {mutation.isPending ? 'Posting...' : 'Post Comment'}
       </Button>
     </Box>
   );
