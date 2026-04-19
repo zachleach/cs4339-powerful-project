@@ -2,35 +2,17 @@ import React, { useState } from 'react';
 import {
   Box, TextField, Button, Typography, Paper, Tabs, Tab,
 } from '@mui/material';
-// TODO: import { useMutation } from '@tanstack/react-query';
-// eslint-disable-next-line no-unused-vars
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
-// @FegelSamuel: this is the gated entry point shown when no user is logged in.
-// handleLogin and handleRegister are yours to implement (see TODO comments below).
-// On successful login, call onLogin(res.data) which sets user state in App (photoShare.jsx)
-// and switches the view from this form to the main app.
-// All seeded test users share the password "password"; login_name is lowercase last name (e.g. "took").
 /**
  * LoginRegister component
  * Props:
  *   onLogin - callback when user successfully logs in, receives user object
- *
- * TODO: implement login form
- * - login_name and password fields
- * - call POST /admin/login
- * - on success, call onLogin(user)
- * - on error, show error message
- *
- * TODO: implement registration form
- * - fields: login_name, password, first_name, last_name, location, description, occupation
- * - call POST /user
- * - on success, maybe auto-login or show success message
- * - on error (duplicate login_name), show error message
  */
-// eslint-disable-next-line no-unused-vars
 function LoginRegister({ onLogin }) {
+  const queryClient = useQueryClient();
   let [tab, setTab] = useState(0); // 0 = login, 1 = register
   let [error, setError] = useState('');
 
@@ -47,24 +29,48 @@ function LoginRegister({ onLogin }) {
   let [description, setDescription] = useState('');
   let [occupation, setOccupation] = useState('');
 
+  const loginMutation = useMutation({
+    mutationFn: (credentials) => api.post('/admin/login', credentials),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      onLogin(res.data);
+      console.log("Login succcess")
+    },
+    onError: (err) => {
+      setError(err.response?.data || 'Login failed');
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: (userData) => api.post('/user', userData),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // Auto login after registration
+      onLogin(res.data);
+    },
+    onError: (err) => {
+      setError(err.response?.data || 'Registration failed');
+    },
+  });
+
   function handleLogin(e) {
     e.preventDefault();
     setError('');
-    // TODO: implement with useMutation
-    // api.post('/admin/login', { login_name: loginName, password })
-    //   .then(res => onLogin(res.data))
-    //   .catch(err => setError(err.response?.data || 'Login failed'));
-    setError('Login not implemented yet');
+    loginMutation.mutate({ login_name: loginName, password });
   }
 
   function handleRegister(e) {
     e.preventDefault();
     setError('');
-    // TODO: implement with useMutation
-    // api.post('/user', { login_name: regLoginName, password: regPassword, first_name: firstName, ... })
-    //   .then(res => { /* maybe auto-login */ })
-    //   .catch(err => setError(err.response?.data || 'Registration failed'));
-    setError('Registration not implemented yet');
+    registerMutation.mutate({
+      login_name: regLoginName,
+      password: regPassword,
+      first_name: firstName,
+      last_name: lastName,
+      location,
+      description,
+      occupation,
+    });
   }
 
   return (

@@ -1,10 +1,11 @@
 // @FegelSamuel: thin server file; route logic lives in controllers/, not here.
 // We split handlers into controllers/user.js, controllers/photo.js, controllers/auth.js
 // so this file stays easy to read.
+// thanks zach
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-// TODO: import session from 'express-session';
+import session from 'express-session';
 
 import * as userController from './controllers/user.js';
 import * as photoController from './controllers/photo.js';
@@ -17,18 +18,31 @@ const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1/project3';
 
 // Enable CORS for frontend running on a different port
 // TODO: configure cors to allow credentials for session cookies
-app.use(cors());
+
+
+const allowedOrigins = [
+  process.env.REACT_URL || 'http://localhost:3000',
+  process.env.SERVER_URL || `http://localhost:${port}` // allows itself
+];
+
+var corsOptions = {
+  credentials: true,
+  origin: allowedOrigins,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions)); 
 
 // Parse JSON bodies
 app.use(express.json());
 
-// TODO: configure express-session middleware
-// app.use(session({
-//   secret: 'your-secret-key',
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: { secure: false }  // set true in production with HTTPS
-// }));
+// Configure express-session middleware
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }  // set true in production with HTTPS and whatnot
+}));
 
 // Connect to MongoDB
 mongoose.connect(mongoUrl);
@@ -44,18 +58,17 @@ mongoose.connection.once('open', () => {});
  * TODO: implement - check req.session.userId, return 401 if not set
  */
 function requireAuth(req, res, next) {
-  // TODO: implement
-  // if (!req.session.userId) {
-  //   return res.status(401).send('Not logged in');
-  // }
-  next(); // temporarily allow all requests
+  if (!req.session.userId) {
+    return res.status(401).send('Not logged in');
+  }
+  next();
 }
 
-// @FegelSamuel: auth routes are intentionally public (no requireAuth).
 // All read/write data routes go through requireAuth first.
 // Auth routes (no auth required)
 app.post('/admin/login', authController.login);
 app.post('/admin/logout', authController.logout);
+app.get('/admin/me', authController.me);
 app.post('/user', authController.register);
 
 // Protected routes (require auth)

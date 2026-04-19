@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ReactDOM from 'react-dom/client';
 import { Grid, Typography, Paper } from '@mui/material';
@@ -14,6 +14,7 @@ import UserList from './components/UserList';
 import UserPhotos from './components/UserPhotos';
 // eslint-disable-next-line no-unused-vars
 import LoginRegister from './components/LoginRegister';
+import api from './lib/api';
 
 const queryClient = new QueryClient();
 
@@ -41,12 +42,12 @@ function UserPhotosRoute() {
  * Root layout - shows app when logged in
  * TODO: receive user prop and pass to TopBar for logout button
  */
-function Root() {
+function Root({ user, onLogout }) {
   return (
     <div>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TopBar />
+          <TopBar user={user} onLogout={onLogout} />
         </Grid>
         <div className="main-topbar-buffer" />
         <Grid item sm={3}>
@@ -68,27 +69,6 @@ function UserLayout() {
   return <Outlet />;
 }
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Root />,
-    children: [
-      { index: true, element: <Home /> },
-
-      { path: 'users', element: <UserList /> },
-
-      {
-        path: 'users/:userId',
-        element: <UserLayout />,
-        children: [
-          { index: true, element: <UserDetailRoute /> },
-          { path: 'photos', element: <UserPhotosRoute /> },
-        ],
-      },
-    ],
-  },
-]);
-
 // @FegelSamuel: App owns the top-level auth state. Once you implement login:
 // 1. Uncomment the auth gate so LoginRegister renders when user is null.
 // 2. Pass user down to Root so it can reach TopBar for the logout button.
@@ -100,14 +80,53 @@ const router = createBrowserRouter([
  * - If logged in, show RouterProvider with the app
  * - Pass user to Root so TopBar can show logout button
  */
-function App() {
-  // eslint-disable-next-line no-unused-vars
-  let [user, setUser] = useState(null);
 
-  // TODO: implement auth gating
-  // if (!user) {
-  //   return <LoginRegister onLogin={setUser} />;
-  // }
+function App() {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/admin/me')
+      .then((response) => {
+        setUser(response.data);
+      })
+      .catch(() => {
+        // Not logged in or error, just clear user and continue
+        setUser(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <Typography>Loading...</Typography>;
+  }
+
+  if (!user) {
+    return <LoginRegister onLogin={setUser} />;
+  }
+
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <Root user={user} onLogout={() => setUser(null)} />,
+      children: [
+        { index: true, element: <Home /> },
+
+        { path: 'users', element: <UserList /> },
+
+        {
+          path: 'users/:userId',
+          element: <UserLayout />,
+          children: [
+            { index: true, element: <UserDetailRoute /> },
+            { path: 'photos', element: <UserPhotosRoute /> },
+          ],
+        },
+      ],
+    },
+  ]);
 
   return <RouterProvider router={router} />;
 }
