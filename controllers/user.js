@@ -25,8 +25,10 @@ async function getList(req, res) {
  * GET /user/:id
  * Returns user details: { _id, first_name, last_name, location, description, occupation }
  */
-// @FegelSamuel: always validate the id format before hitting the DB; MongoDB throws if you pass
-// a malformed ObjectId to findById, so isValidObjectId catches that before it blows up.
+// @FegelSamuel: delete on Mongoose docs doesn't work - need .toObject() first
+// Also move the null check BEFORE the deletes or it crashes when user not found
+// Fix: let userObj = user.toObject(); delete userObj.login_name; etc.
+// Or simpler: use .select('first_name last_name location description occupation') on findById
 async function getById(req, res) {
   try {
     let userId = req.params.id;
@@ -36,11 +38,11 @@ async function getById(req, res) {
     }
 
     let user = await User.findById(userId);
+    if (!user) return res.status(400).send('User not found');
     // tests yell at me to do this, i don't remember what __v is for
     delete user.login_name;
     delete user.password_digest;
     delete user.__v;
-    if (!user) return res.status(400).send('User not found');
     return res.json(user);
   } catch (err) {
     return res.status(500).send(err.message);

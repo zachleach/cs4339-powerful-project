@@ -1,7 +1,10 @@
-// @FegelSamuel: thin server file; route logic lives in controllers/, not here.
-// We split handlers into controllers/user.js, controllers/photo.js, controllers/auth.js
-// so this file stays easy to read.
-// thanks zach
+// @FegelSamuel: LINT FIXES NEEDED
+// 1. Line 22: remove extra blank line
+// 2. Line 25, 31, 44: add trailing commas
+// 3. Line 28: change var to let
+// 4. Line 34: remove trailing space
+// 5. Line 44: remove extra spaces before comment
+// 6. Line 60: add "return next();" instead of just "next();" for consistent-return
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
