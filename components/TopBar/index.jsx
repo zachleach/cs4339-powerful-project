@@ -3,14 +3,13 @@ import {
   AppBar, Toolbar, Typography, Button,
 } from '@mui/material';
 import { useLocation, useMatch } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '../../lib/api';
 import './styles.css';
 
 // @FegelSamuel: TopBar is wired to show "Hi {name}" and a Logout button when the user prop is set.
 // The user prop comes from App in photoShare.jsx once login succeeds.
 // handleLogout needs to call POST /admin/logout, then call onLogout() to clear user state in App.
-// eslint-disable-next-line no-unused-vars
 function TopBar({ user, onLogout }) {
   const location = useLocation();
   const photosMatch = useMatch('/users/:userId/photos');
@@ -31,9 +30,23 @@ function TopBar({ user, onLogout }) {
     context = photosMatch ? 'Photos of ' + name : name;
   }
 
-  // eslint-disable-next-line no-unused-vars
+  const logoutMutation = useMutation({
+    mutationFn: () => api.post('/admin/logout'),
+    onSuccess: () => {
+      console.log("Successfully mogged out")
+      onLogout();
+    },
+    onError: (err) => {
+      // eslint-disable-next-line no-console
+      console.error('Logout failed:', err);
+      // Even if server logout fails (e.g. session already expired),
+      // we usually want to clear the local state.
+      onLogout();
+    },
+  });
+
   function handleLogout() {
-    // TODO: implement with useMutation once auth is in place
+    logoutMutation.mutate();
   }
 
   return (
