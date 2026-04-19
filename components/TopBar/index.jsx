@@ -29,7 +29,7 @@ function TopBar({ user, onLogout }) {
     context = photosMatch ? 'Photos of ' + name : name;
   }
 
-  let logoutMutation = useMutation({
+  const logoutMutation = useMutation({
     mutationFn: () => api.post('/admin/logout'),
     onSuccess: () => {
       onLogout();

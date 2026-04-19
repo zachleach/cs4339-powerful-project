@@ -29,7 +29,7 @@ function LoginRegister({ onLogin }) {
   let [description, setDescription] = useState('');
   let [occupation, setOccupation] = useState('');
 
-  let loginMutation = useMutation({
+  const loginMutation = useMutation({
     mutationFn: credentials => api.post('/admin/login', credentials),
     onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -40,7 +40,7 @@ function LoginRegister({ onLogin }) {
     },
   });
 
-  let registerMutation = useMutation({
+  const registerMutation = useMutation({
     mutationFn: userData => api.post('/user', userData),
     onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: ['users'] });

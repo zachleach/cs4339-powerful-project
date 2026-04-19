@@ -81,16 +81,16 @@ function UserLayout() {
  */
 
 function App() {
-  let qc = useQueryClient();
+  const qc = useQueryClient();
 
-  let meQuery = useQuery({
+  const meQuery = useQuery({
     queryKey: ['me'],
     queryFn: () => api.get('/admin/me').then(r => r.data),
     retry: false,
     staleTime: Infinity,
   });
 
-  let user = meQuery.data || null;
+  const user = meQuery.data || null;
 
   function handleLogin(userData) {
     qc.setQueryData(['me'], userData);
