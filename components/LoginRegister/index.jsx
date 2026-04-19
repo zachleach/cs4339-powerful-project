@@ -30,25 +30,23 @@ function LoginRegister({ onLogin }) {
   let [occupation, setOccupation] = useState('');
 
   const loginMutation = useMutation({
-    mutationFn: (credentials) => api.post('/admin/login', credentials),
-    onSuccess: (res) => {
+    mutationFn: credentials => api.post('/admin/login', credentials),
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       onLogin(res.data);
-      console.log("Login succcess")
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.response?.data || 'Login failed');
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: (userData) => api.post('/user', userData),
-    onSuccess: (res) => {
+    mutationFn: userData => api.post('/user', userData),
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      // Auto login after registration
       onLogin(res.data);
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.response?.data || 'Registration failed');
     },
   });

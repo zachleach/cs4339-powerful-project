@@ -64,6 +64,13 @@ async function getPhotosOfUser(req, res) {
  * - Add comment to photo with user_id from session
  * - Return updated photo or 200
  */
+// @FegelSamuel: IMPLEMENT THIS (Problem 3, 15 points)
+// 1. Get photoId from req.params, comment text from req.body.comment
+// 2. Return 400 if comment is empty/missing
+// 3. Find photo by photoId, return 404 if not found
+// 4. Push new comment: { comment, user_id: req.session.userId, date_time: new Date() }
+// 5. Call photo.save(), return 200
+// Note: requireAuth middleware already handles 401, so you don't need to check session here
 async function addComment(req, res) {
   // TODO: implement
   return res.status(501).send('Not implemented');
