@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -10,7 +11,7 @@ import * as authController from './controllers/auth.js';
 const app = express();
 
 const port = process.env.PORT || 3001;
-const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1/project3';
+const mongoUrl = process.env.MONGODB_URI || process.env.MONGO_URL || 'mongodb://127.0.0.1/project4';
 
 // Enable CORS for frontend running on a different port
 const allowedOrigins = [
@@ -31,7 +32,7 @@ app.use(express.json());
 
 // Configure express-session middleware
 app.use(session({
-  secret: 'your-secret-key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false }, // set true in production with HTTPS

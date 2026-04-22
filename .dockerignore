@@ -1,0 +1,17 @@
+node_modules
+.env
+.git
+.gitignore
+.claude
+*.md
+test
+components
+styles
+images
+public
+dist
+*.html
+vite.config.js
+nodemon.json
+.eslintrc.cjs
+.eslintignore
