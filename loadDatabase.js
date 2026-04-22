@@ -64,8 +64,8 @@ Promise.all(removePromises)
     const userModels = models.userListModel();
     const mapFakeId2RealId = {};
     const userPromises = userModels.map(async function (user) {
-      const login_name = user.first_name.toLowerCase();
-      const password_digest = await bcrypt.hash("weak", 10);
+      const login_name = user.last_name.toLowerCase();
+      const password_digest = await bcrypt.hash("password", 10);
       return User.create({
         first_name: user.first_name,
         last_name: user.last_name,
