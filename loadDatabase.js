@@ -12,6 +12,8 @@ import "dotenv/config";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import mongoose from "mongoose";
 // eslint-disable-next-line import/no-extraneous-dependencies
+import bcrypt from "bcrypt";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import bluebird from "bluebird";
 import models from "./modelData/photoApp.js";
 
@@ -61,13 +63,17 @@ Promise.all(removePromises)
 
     const userModels = models.userListModel();
     const mapFakeId2RealId = {};
-    const userPromises = userModels.map(function (user) {
+    const userPromises = userModels.map(async function (user) {
+      const login_name = user.first_name.toLowerCase();
+      const password_digest = await bcrypt.hash("weak", 10);
       return User.create({
         first_name: user.first_name,
         last_name: user.last_name,
         location: user.location,
         description: user.description,
         occupation: user.occupation,
+        login_name,
+        password_digest,
       })
         .then(function (userObj) {
           // Set the unique ID of the object. We use the MongoDB generated _id
