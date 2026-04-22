@@ -10,6 +10,11 @@ import * as authController from './controllers/auth.js';
 
 const app = express();
 
+// Trust proxy for secure cookies behind Render's reverse proxy
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const port = process.env.PORT || 3001;
 const mongoUrl = process.env.MONGODB_URI || process.env.MONGO_URL || 'mongodb://127.0.0.1/project4';
 
